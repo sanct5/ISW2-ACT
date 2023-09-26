@@ -21,15 +21,18 @@ app.use((error, req, res, next) => {
     const { payload } = err.output;
     return res.status(statusCode).json(payload);
   }
-
   return next;
 });
 
 const startServer = async () => {
   await startConnection();
   app.listen(PORT, () => {
+    // eslint-disable-next-line
     console.log(`http://localhost:${PORT}`);
   });
 };
 
 startServer();
+
+// Dockerizacion -> docker-compose up -d
+// Detenerlo -> docker-compose stop
