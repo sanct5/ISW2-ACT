@@ -1,6 +1,5 @@
 import Boom from '@hapi/boom';
 import HttpStatusCodes from 'http-status-codes';
-import applyFilters from '../../controllers/filters/applyFilters.mjs';
 
 const applyFiltersHandler = async (req, res, next) => {
   try {
@@ -17,7 +16,8 @@ const applyFiltersHandler = async (req, res, next) => {
       throw Boom.badData('No se hallaron los filtros');
     }
 
-    const response = await applyFilters({ filters, images: req.files });
+    const response = await req.container
+      .processService.applyFilters({ filters, images: req.files });
     return res.status(HttpStatusCodes.OK).json(response);
   } catch (error) {
     const err = Boom.isBoom(error) ? error : Boom.internal(error);

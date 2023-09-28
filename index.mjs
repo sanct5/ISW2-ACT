@@ -4,9 +4,11 @@ import Boom from '@hapi/boom';
 import { startConnection } from './src/mongo/index.mjs';
 import FiltersRouter from './src/handlers/filters/index.mjs';
 import { PORT } from './src/commons/env.mjs';
+import buildContainer from './src/container/buildContainer.mjs';
 
 const app = Express();
 app.use(bodyParser.json());
+app.use(buildContainer);
 
 app.get('/', (req, res) => {
   res.send('OK NORMAL');
