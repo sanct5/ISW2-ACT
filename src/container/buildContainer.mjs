@@ -6,7 +6,8 @@ const buildContainer = (req, _res, next) => {
   const container = {};
 
   const processRepository = new ProcessRepository();
-  const processService = new ProcessService({ processRepository, MinioService });
+  const minioService = new MinioService();
+  const processService = new ProcessService({ processRepository, minioService });
 
   container.processService = processService;
 

@@ -21,6 +21,7 @@ app.use((error, req, res, next) => {
     const err = Boom.isBoom(error) ? error : Boom.internal(error);
     const { statusCode } = err.output;
     const { payload } = err.output;
+    payload.stack = error.stack;
     return res.status(statusCode).json(payload);
   }
   return next;
