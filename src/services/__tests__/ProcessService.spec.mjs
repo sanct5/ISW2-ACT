@@ -1,11 +1,9 @@
 import {
   describe, test, expect, jest,
 } from '@jest/globals';
-import { supertest } from 'supertest';
 import ProcessRepository from '../../repositories/ProcessRepository.mjs';
 import MinioService from '../MinioService.mjs';
 import ProcessService from '../ProcessService.mjs';
-import app from '../../app.mjs';
 
 describe('ProcessService test', () => {
   const processRepository = new ProcessRepository();
@@ -19,6 +17,7 @@ describe('ProcessService test', () => {
     expect(processService.applyFilters({})).rejects.toThrow();
     expect(processService.applyFilters({ filters: [] })).rejects.toThrow();
   });
+
   test('Test applyFilters function with valid payload', async () => {
     const payload = {
       filters: ['negative'],
@@ -39,19 +38,5 @@ describe('ProcessService test', () => {
     const process = await processService.applyFilters(payload);
 
     expect(process).toMatchObject(expectedProcess);
-  });
-
-  test('POST /images should return 200', async () => {
-    const response = await supertest(app).post('/images')
-      .set('Content-Type', 'multipart/form-data')
-      .field('filters[]', 'grayscale')
-      .field('filters[]', 'blur')
-      .attach('images[]', 'src/__tests__/assets/img.jpeg');
-
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('filters');
-    expect(response.body).toHaveProperty('_id');
-    expect(response.body).toHaveProperty('createdAt');
-    expect(response.body).toHaveProperty('updatedAt');
   });
 });

@@ -1,6 +1,6 @@
 import supertest from 'supertest';
 import {
-  describe, jest, expect, beforeEach, afterEach, test,
+  describe, expect, beforeEach, afterEach, test,
 } from '@jest/globals';
 
 import app from '../app.mjs';
@@ -22,10 +22,25 @@ describe('test app express server', () => {
   });
 
   test('POST /images should return 200', async () => {
-    const response = await supertest(app).post('/images').set('Content-Type', 'multipart/form-data')
+    const response = await supertest(app).post('/images')
+      .set('Content-Type', 'multipart/form-data')
       .field('filters[]', 'grayscale')
       .field('filters[]', 'blur')
-      .attach('images[]', 'src/__tests__/test.jpg');
+      .attach('images[]', './assets/test.jpg');
+
     expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('filters');
+    expect(response.body).toHaveProperty('_id');
+    expect(response.body).toHaveProperty('createdAt');
+    expect(response.body).toHaveProperty('updatedAt');
+  });
+
+  test('POST /images shuld return 422 status', async () => {
+    const response = await supertest(app).post('/images')
+      .set('Content-Type', 'multipart/form-data')
+      .field('filters[]', 'grayscale');
+
+    expect(response.status).toBe(422);
+    expect(response.body.message).toHaveProperty('"images" must contain at least 1 items');
   });
 });
