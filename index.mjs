@@ -11,6 +11,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-// Dockerizacion -> docker-compose up -d
-// Detenerlo -> docker-compose stop

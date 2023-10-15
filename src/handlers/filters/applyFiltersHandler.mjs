@@ -13,4 +13,5 @@ const applyFiltersHandler = async (req, res, next) => {
     return next(err);
   }
 };
+
 export default applyFiltersHandler;

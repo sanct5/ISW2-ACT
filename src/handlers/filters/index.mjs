@@ -2,8 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import applyFiltersHandler from './applyFiltersHandler.mjs';
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = Router();
 router.get('/', (req, res) => {
