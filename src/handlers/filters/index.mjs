@@ -10,6 +10,6 @@ router.get('/', (req, res) => {
   res.send('OK GET IMAGES');
 });
 
-router.post('/', upload.array('files[]'), applyFiltersHandler);
+router.post('/', upload.array('images[]'), applyFiltersHandler);
 
 export default router;

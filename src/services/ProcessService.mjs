@@ -27,11 +27,13 @@ class ProcessService {
 
     const { images, filters } = payload;
 
-    const process = await this.processRepository.save(payload);
+    const process = await this.processRepository.save({ filters });
 
     const imagesPromises = images.map((image) => this.minioService.saveImage(image));
 
     const imagesNames = await Promise.all(imagesPromises);
+
+    console.log(imagesNames);
 
     return process;
   }

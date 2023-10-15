@@ -2,6 +2,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 } from 'uuid';
 import { Boom } from '@hapi/boom';
 import { MINIO_ACCESS_KEY, MINIO_HOST, MINIO_SECRET_KEY } from '../commons/env.mjs';
+import { BUCKET_NAME } from '../commons/constans.mjs';
 
 class MinioService {
   conn = null;
@@ -59,4 +60,5 @@ class MinioService {
     }
   }
 }
+
 export default MinioService;

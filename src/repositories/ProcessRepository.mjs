@@ -6,7 +6,7 @@ class ProcessRepository {
     const newProcess = new ProcessModel();
     newProcess.filters = process.filters;
     await newProcess.save();
-    return newProcess();
+    return newProcess;
   }
 }
 
