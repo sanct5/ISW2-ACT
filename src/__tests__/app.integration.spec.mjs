@@ -26,7 +26,7 @@ describe('test app express server', () => {
       .set('Content-Type', 'multipart/form-data')
       .field('filters[]', 'grayscale')
       .field('filters[]', 'blur')
-      .attach('images[]', './assets/test.jpg');
+      .attach('images[]', 'src/__tests__/assets/test.jpg');
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('filters');
