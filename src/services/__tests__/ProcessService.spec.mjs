@@ -42,4 +42,21 @@ describe('ProcessService test', () => {
 
     expect(process).toMatchObject(expectedProcess);
   });
+
+  test('Test upload images whose size exceeds 50MB', async () => {
+    const payload = {
+      filters: ['negative'],
+      images: [
+        { originalname: 'image1.png', buffer: Buffer.from(''), size: 30 * 1024 * 1024 }, //Image 30MB
+        { originalname: 'image1.png', buffer: Buffer.from(''), size: 25 * 1024 * 1024 }, //Image 25MB
+      ],
+    };
+
+    try {
+      await processService.applyFilters(payload);
+    } catch (error) {
+      expect(error.isBoom).toBe(true);
+      expect(error.output.payload.message).toBe('The total size sum of the images exceeds 50 MB.');
+    }
+  });
 });
