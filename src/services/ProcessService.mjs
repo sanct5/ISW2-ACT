@@ -29,6 +29,12 @@ class ProcessService {
 
     const process = await this.processRepository.save({ filters });
 
+    const totalSize = images.reduce((acum, image) => acum + image.size, 0);
+
+    if (totalSize > 50 * 1024 * 1024) {
+      throw Boom.badData('The total size sum of the images exceeds 50 MB.');
+    }
+
     const imagesPromises = images.map((image) => this.minioService.saveImage(image));
 
     const imagesNames = await Promise.all(imagesPromises);
