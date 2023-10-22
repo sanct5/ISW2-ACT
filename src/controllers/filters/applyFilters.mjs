@@ -2,6 +2,7 @@ import Joi from 'joi';
 import Boom from '@hapi/boom';
 import Process from '../../models/Process.mjs';
 import { GREYSCALE_FILTER, NEGATIVE_FILTER, BLUR_FILTER } from '../../commons/constans.mjs';
+import ProcessModel from '../../models/Process.mjs';
 
 const PayloadValidation = Joi.object({
   // eslint-disable-next-line
@@ -16,8 +17,9 @@ const applyFilters = async (payload) => {
     throw Boom.badData(error.message, { error });
   }
 
-  const newProcess = new Process();
+  const newProcess = new ProcessModel(payload);
   newProcess.filters = payload.filters;
+
 
   await newProcess.save();
   return newProcess;
