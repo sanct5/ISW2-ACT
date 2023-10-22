@@ -10,6 +10,7 @@ class ProcessRepository {
     return newProcess;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   async getProcessById(id) {
     const newProcess = await ProcessModel.findById(id);
     return newProcess;

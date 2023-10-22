@@ -47,8 +47,8 @@ describe('ProcessService test', () => {
     const payload = {
       filters: ['negative'],
       images: [
-        { originalname: 'image1.png', buffer: Buffer.from(''), size: 30 * 1024 * 1024 }, //Image 30MB
-        { originalname: 'image1.png', buffer: Buffer.from(''), size: 25 * 1024 * 1024 }, //Image 25MB
+        { originalname: 'image1.png', buffer: Buffer.from(''), size: 30 * 1024 * 1024 }, // Image 30MB
+        { originalname: 'image1.png', buffer: Buffer.from(''), size: 25 * 1024 * 1024 }, // Image 25MB
       ],
     };
 

@@ -37,6 +37,8 @@ class MinioService {
 
       const { originalname, buffer } = image;
 
+      console.log(buffer);
+
       const originalNameParts = originalname.split('.');
 
       if (originalNameParts.length !== 2) {
@@ -50,7 +52,7 @@ class MinioService {
       await this.conn.send(new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: fileName,
-        body: buffer,
+        Body: buffer,
       }));
 
       return fileName;

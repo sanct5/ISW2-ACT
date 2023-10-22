@@ -1,6 +1,8 @@
 import Joi from 'joi';
 import Boom from '@hapi/boom';
-import { GREYSCALE_FILTER, BLUR_FILTER, NEGATIVE_FILTER } from '../commons/constans.mjs';
+import {
+  GREYSCALE_FILTER, BLUR_FILTER, NEGATIVE_FILTER, IN_PROGRESS_STATUS,
+} from '../commons/constans.mjs';
 
 class ProcessService {
   processRepository = null;
@@ -27,7 +29,18 @@ class ProcessService {
 
     const { images, filters } = payload;
 
-    const process = await this.processRepository.save({ filters });
+    const Data = {
+      filters,
+      images: images.map((image) => ({
+        imageUrl: image.originalname,
+        filters: filters.map((filter) => ({
+          name: filter,
+          status: IN_PROGRESS_STATUS,
+        })),
+      })),
+    };
+
+    const process = await this.processRepository.save(Data);
 
     const totalSize = images.reduce((acum, image) => acum + image.size, 0);
 
@@ -41,6 +54,14 @@ class ProcessService {
 
     console.log(imagesNames);
 
+    return process;
+  }
+
+  async getProcessById(id) {
+    const process = await this.processRepository.getProcessById(id);
+    if (!process) {
+      throw Boom.notFound(`Process with id ${id} not found`);
+    }
     return process;
   }
 }

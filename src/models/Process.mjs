@@ -14,22 +14,27 @@ const FilterSchema = new Schema(
       default: IN_PROGRESS_STATUS,
       required: true,
     },
-    imageUrl: {
+    message: {
       type: String,
-      required: true,
+      required: false,
     },
-    message: String,
   },
   { _id: true },
 );
 
-const ImageSchema = new Schema({
-  imageUrl: {
-    type: String,
-    required: true,
+const ImageSchema = new Schema(
+  {
+    imageUrl: {
+      type: String,
+      required: true,
+    },
+    filters: {
+      type: [FilterSchema],
+      required: true,
+    },
   },
-  filters: [FilterSchema],
-});
+  { _id: true },
+);
 
 const ProcessSchema = new Schema({
   filters: [{
@@ -37,7 +42,10 @@ const ProcessSchema = new Schema({
     enum: TYPE_OF_FILTERS,
     required: true,
   }],
-  images: [ImageSchema],
+  images: {
+    type: [ImageSchema],
+    required: true,
+  },
 }, { timestamps: true });
 
 const ProcessModel = model('Process', ProcessSchema);
