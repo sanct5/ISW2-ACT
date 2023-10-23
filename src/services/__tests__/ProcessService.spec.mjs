@@ -59,4 +59,38 @@ describe('ProcessService test', () => {
       expect(error.output.payload.message).toBe('The total size sum of the images exceeds 50 MB.');
     }
   });
+
+  test('Get image by id', async () => {
+    const process = {
+      id: '1234',
+      filters: ['negative'],
+      images: [
+        {
+          imageUrl: 'image1.png',
+          filters: [
+            { name: 'negative', status: 'IN_PROGRESS' },
+          ],
+        },
+      ],
+    };
+
+    processRepository.getProcessById = jest.fn()
+      .mockImplementationOnce(() => process);
+
+    const result = await processService.getProcessById('1234');
+
+    expect(result).toMatchObject(process);
+  });
+
+  test('Get image by id not found', async () => {
+    processRepository.getProcessById = jest.fn()
+      .mockImplementationOnce(() => null);
+
+    try {
+      await processService.getProcessById('1234');
+    } catch (error) {
+      expect(error.isBoom).toBe(true);
+      expect(error.output.payload.message).toBe('Process with id 1234 not found');
+    }
+  });
 });

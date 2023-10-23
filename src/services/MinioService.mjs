@@ -47,6 +47,10 @@ class MinioService {
 
       const extension = originalNameParts[1];
 
+      if (extension !== 'png' && extension !== 'jpg' && extension !== 'jpeg') {
+        throw Boom.badRequest('Invalid image extension');
+      }
+
       const fileName = `${v4()}.${extension}`;
 
       await this.conn.send(new PutObjectCommand({
