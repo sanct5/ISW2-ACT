@@ -39,11 +39,10 @@ describe('test app express server', () => {
     const response = await supertest(app).post('/images')
       .set('Content-Type', 'multipart/form-data')
       .field('filters[]', 'invalid_filter');
-  
+
     expect(response.status).toBe(422);
     expect(response.body.message).toContain('"filters[0]" must be one of [greyscale, blur, negative]');
   });
-  
 
   test('POST /image should return "Filter are required"', async () => {
     const response = await supertest(app).post('/images')

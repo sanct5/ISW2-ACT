@@ -4,6 +4,10 @@ export default {
     'js',
   ],
   testMatch: ['**/?(*.)integration.+(spec|test).(m)js'],
+  collectCoverageFrom: [
+    '**/app.mjs',
+    '**/handlers/**/*.mjs',
+  ],
   verbose: true,
   collectCoverage: true,
   coverageThreshold: {
