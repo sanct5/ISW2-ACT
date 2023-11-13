@@ -20,13 +20,13 @@ class ProcessService {
     let result;
     switch (filter) {
       case GREYSCALE_FILTER:
-        result = sharp(imageBuffer).greyscale().toBuffer();
+        result = await sharp(imageBuffer).greyscale().toBuffer();
         break;
       case BLUR_FILTER:
-        result = sharp(imageBuffer).blur().toBuffer();
+        result = await sharp(imageBuffer).blur().toBuffer();
         break;
       case NEGATIVE_FILTER:
-        result = sharp(imageBuffer).negate().toBuffer();
+        result = await sharp(imageBuffer).negate().toBuffer();
         break;
       default:
         throw Boom.badData(`Invalid filter: ${filter}`);

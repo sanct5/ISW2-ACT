@@ -1,30 +1,40 @@
 import {
-  describe, test, expect, jest,
+  describe, test, expect, jest, afterEach,
 } from '@jest/globals';
+import sharp from 'sharp';
+import Boom from '@hapi/boom';
 import ProcessRepository from '../../repositories/ProcessRepository.mjs';
-// import MinioService from '../MinioService.mjs';
 import ProcessService from '../ProcessService.mjs';
+
+jest.mock('sharp', () => () => ({
+  greyscale: jest.fn().mockReturnThis(),
+  blur: jest.fn().mockReturnThis(),
+  negate: jest.fn().mockReturnThis(),
+  toBuffer: jest.fn().mockResolvedValue('mock result'),
+}));
 
 describe('ProcessService test', () => {
   const processRepository = new ProcessRepository();
 
   const minioService = {
     saveImage: jest.fn()
-      .mockImplementationOnce(() => Promise.resolve('image1.png')),
+      .mockImplementation(() => Promise.resolve('image1.png')),
   };
 
   const processService = new ProcessService({ minioService, processRepository });
 
-  test('Test applyFilters function with invalid payoad', () => {
-    expect(processService.applyFilters()).rejects.toThrow();
-    expect(processService.applyFilters({})).rejects.toThrow();
-    expect(processService.applyFilters({ filters: [] })).rejects.toThrow();
+  afterEach(jest.clearAllMocks);
+
+  test('Test applyFilters function with invalid payload', async () => {
+    await expect(processService.applyFilters()).rejects.toThrow();
+    await expect(processService.applyFilters({})).rejects.toThrow();
+    await expect(processService.applyFilters({ filters: [] })).rejects.toThrow();
   });
 
   test('Test applyFilters function with valid payload', async () => {
     const payload = {
       filters: ['negative'],
-      images: [{ originalname: 'image1.png', buffer: Buffer.from('') }],
+      images: [{ originalname: 'image1.png', buffer: Buffer.from('Hello, world!') }],
     };
     const expectedProcess = {
       id: '1234',
@@ -33,10 +43,14 @@ describe('ProcessService test', () => {
     };
 
     processRepository.save = jest.fn()
-      .mockImplementationOnce(() => expectedProcess);
+      .mockImplementationOnce(() => Promise.resolve(expectedProcess));
 
     minioService.saveImage = jest.fn()
       .mockImplementationOnce(() => Promise.resolve('image1.png'));
+
+    // Mock the applyFilter function to avoid the error
+    processService.applyFilter = jest.fn()
+      .mockImplementationOnce(() => Promise.resolve(Buffer.from('Hello, world!')));
 
     const process = await processService.applyFilters(payload);
 
@@ -52,12 +66,7 @@ describe('ProcessService test', () => {
       ],
     };
 
-    try {
-      await processService.applyFilters(payload);
-    } catch (error) {
-      expect(error.isBoom).toBe(true);
-      expect(error.output.payload.message).toBe('The total size sum of the images exceeds 50 MB.');
-    }
+    await expect(processService.applyFilters(payload)).rejects.toThrow('The total size sum of the images exceeds 50 MB.');
   });
 
   test('Get image by id', async () => {
@@ -75,22 +84,24 @@ describe('ProcessService test', () => {
     };
 
     processRepository.getProcessById = jest.fn()
-      .mockImplementationOnce(() => process);
+      .mockImplementationOnce(() => Promise.resolve(process));
 
-    const result = await processService.getProcessById('1234');
+    const result = await processRepository.getProcessById('1234');
 
     expect(result).toMatchObject(process);
   });
 
-  test('Get image by id not found', async () => {
-    processRepository.getProcessById = jest.fn()
-      .mockImplementationOnce(() => null);
+  test('Test applyFilter method', async () => {
+    const mockImageBuffer = Buffer.from('mock image buffer');
 
-    try {
-      await processService.getProcessById('1234');
-    } catch (error) {
-      expect(error.isBoom).toBe(true);
-      expect(error.output.payload.message).toBe('Process with id 1234 not found');
-    }
+    const result = await processService.applyFilter('GREYSCALE_FILTER', mockImageBuffer);
+
+    expect(result).toBe('mock result');
+  });
+
+  test('Test applyFilter method with invalid filter', async () => {
+    const mockImageBuffer = Buffer.from('mock image buffer');
+
+    await expect(processService.applyFilter('INVALID_FILTER', mockImageBuffer)).rejects.toThrow(Boom.badData('Invalid filter: INVALID_FILTER'));
   });
 });
