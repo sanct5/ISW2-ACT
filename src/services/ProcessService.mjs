@@ -43,19 +43,6 @@ class ProcessService {
 
     const { images, filters } = payload;
 
-    const data = {
-      filters,
-      images: images.map((image) => ({
-        imageUrl: image.originalname,
-        filters: filters.map((filter) => ({
-          name: filter,
-          status: IN_PROGRESS_STATUS,
-        })),
-      })),
-    };
-
-    const process = await this.processRepository.save(data);
-
     const totalSize = images.reduce((acum, image) => acum + image.size, 0);
 
     if (totalSize > 50 * 1024 * 1024) {
@@ -70,10 +57,40 @@ class ProcessService {
       return this.minioService.saveImage({ ...image, buffer: imageBuffer });
     });
 
-    const imagesNames = await Promise.all(imagesPromises);
+    await Promise.all(imagesPromises);
 
-    console.log(imagesNames);
+    const Data = await this.dataConstructor(images, filters, this.minioService);
 
+    const process = await this.processRepository.save(Data);
+
+    return process;
+  }
+
+  async dataImage(img, filters) {
+    const imageUrl = await this.minioService.generateSignedUrl(img.originalname);
+    const filterData = filters.map((filter) => ({
+      name: filter,
+      status: IN_PROGRESS_STATUS,
+    }));
+    return { imageUrl, filters: filterData, originalname: img.originalname };
+  }
+
+  async dataConstructor(imgs, filters) {
+    const imagesData = await Promise.all(
+      imgs.map((image) => this.dataImage(image, filters)),
+    );
+    const newData = {
+      filters,
+      images: imagesData,
+    };
+    return newData;
+  }
+
+  async getProcessById(id) {
+    const process = await this.processRepository.getProcessById(id);
+    if (!process) {
+      throw Boom.notFound(`Process with id ${id} not found`);
+    }
     return process;
   }
 }
