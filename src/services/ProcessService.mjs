@@ -1,23 +1,37 @@
 import Joi from 'joi';
 import Boom from '@hapi/boom';
+import sharp from 'sharp';
 import {
   GREYSCALE_FILTER, BLUR_FILTER, NEGATIVE_FILTER, IN_PROGRESS_STATUS,
 } from '../commons/constans.mjs';
 
 class ProcessService {
-  processRepository = null;
-
-  minioService = null;
-
-  payloadValidation = Joi.object({
-    filters: Joi.array().required().min(1)
-      .items(Joi.string().valid(GREYSCALE_FILTER, BLUR_FILTER, NEGATIVE_FILTER)),
-    images: Joi.array().required().min(1),
-  }).required();
-
   constructor({ processRepository, minioService }) {
     this.processRepository = processRepository;
     this.minioService = minioService;
+    this.payloadValidation = Joi.object({
+      filters: Joi.array().required().min(1)
+        .items(Joi.string().valid(GREYSCALE_FILTER, BLUR_FILTER, NEGATIVE_FILTER)),
+      images: Joi.array().required().min(1),
+    }).required();
+  }
+
+  async applyFilter(filter, imageBuffer) {
+    let result;
+    switch (filter) {
+      case GREYSCALE_FILTER:
+        result = sharp(imageBuffer).greyscale().toBuffer();
+        break;
+      case BLUR_FILTER:
+        result = sharp(imageBuffer).blur().toBuffer();
+        break;
+      case NEGATIVE_FILTER:
+        result = sharp(imageBuffer).negate().toBuffer();
+        break;
+      default:
+        throw Boom.badData(`Invalid filter: ${filter}`);
+    }
+    return result;
   }
 
   async applyFilters(payload) {
@@ -29,7 +43,7 @@ class ProcessService {
 
     const { images, filters } = payload;
 
-    const Data = {
+    const data = {
       filters,
       images: images.map((image) => ({
         imageUrl: image.originalname,
@@ -40,7 +54,7 @@ class ProcessService {
       })),
     };
 
-    const process = await this.processRepository.save(Data);
+    const process = await this.processRepository.save(data);
 
     const totalSize = images.reduce((acum, image) => acum + image.size, 0);
 
@@ -48,20 +62,18 @@ class ProcessService {
       throw Boom.badData('The total size sum of the images exceeds 50 MB.');
     }
 
-    const imagesPromises = images.map((image) => this.minioService.saveImage(image));
+    const imagesPromises = images.map(async (image) => {
+      let imageBuffer = image.buffer;
+      for (const filter of filters) {
+        imageBuffer = await this.applyFilter(filter, imageBuffer);
+      }
+      return this.minioService.saveImage({ ...image, buffer: imageBuffer });
+    });
 
     const imagesNames = await Promise.all(imagesPromises);
 
     console.log(imagesNames);
 
-    return process;
-  }
-
-  async getProcessById(id) {
-    const process = await this.processRepository.getProcessById(id);
-    if (!process) {
-      throw Boom.notFound(`Process with id ${id} not found`);
-    }
     return process;
   }
 }

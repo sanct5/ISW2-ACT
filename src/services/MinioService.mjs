@@ -1,8 +1,9 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { v4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { MINIO_ACCESS_KEY, MINIO_HOST, MINIO_SECRET_KEY } from '../commons/env.mjs';
 import { BUCKET_NAME } from '../commons/constans.mjs';
+import getStreamBuffer from '../handlers/filters/getStreamBuffer.mjs';
 
 class MinioService {
   conn = null;
@@ -19,6 +20,17 @@ class MinioService {
         forcePathStyle: true,
       });
     }
+  }
+
+  async getImageBuffer(image) {
+    const { originalname } = image;
+
+    const response = await this.conn.send(new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: originalname,
+    }));
+
+    return getStreamBuffer(response.Body);
   }
 
   async saveImage(image) {
