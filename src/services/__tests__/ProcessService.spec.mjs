@@ -15,7 +15,7 @@ describe('ProcessService test', () => {
 
   const processService = new ProcessService({ minioService, processRepository });
 
-  test('Test applyFilters function with invalid payoad', () => {
+  test('Test applyFilters function with invalid payload', () => {
     expect(processService.applyFilters()).rejects.toThrow();
     expect(processService.applyFilters({})).rejects.toThrow();
     expect(processService.applyFilters({ filters: [] })).rejects.toThrow();
