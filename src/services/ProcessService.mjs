@@ -62,15 +62,12 @@ class ProcessService {
       throw Boom.badData('The total size sum of the images exceeds 50 MB.');
     }
 
-    const imagesPromises = images.map(async (image) => {
-      let imageBuffer = image.buffer;
-      for (const filter of filters) {
-        imageBuffer = await this.applyFilter(filter, imageBuffer);
-      }
+    const imagesPromises = images.map((image) => filters.map(async (filter) => {
+      const imageBuffer = await this.applyFilter(filter, image.buffer);
       return this.minioService.saveImage({ ...image, buffer: imageBuffer });
-    });
+    }));
 
-    const imagesNames = await Promise.all(imagesPromises);
+    const imagesNames = await Promise.all(imagesPromises.flat());
 
     console.log(imagesNames);
 

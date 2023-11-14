@@ -3,31 +3,84 @@ import {
 } from '@jest/globals';
 import ProcessRepository from '../../repositories/ProcessRepository.mjs';
 import ProcessModel from '../../models/Process.mjs';
-
-jest.mock('../../models/Process.mjs', () => jest.fn().mockImplementation((process) => ({
-  ...process,
-  save: jest.fn().mockImplementation(() => Promise.resolve(this)),
-})));
+import ProcessService from '../ProcessService.mjs';
 
 describe('ProcessRepository test', () => {
-  const processRepository = new ProcessRepository();
+  // test('Test save method', async () => {
+  //   const processRepository = new ProcessRepository();
+  //   const payload = {
+  //     filters: ['negative', 'grayscale'],
+  //     images: [
+  //       {
+  //         originalname: 'img.png',
+  //         buffer: Buffer.from('./assets/test.jpg'),
+  //       },
+  //     ],
+  //   };
+
+  //   const expectedData = {
+  //     filters: ['negative', 'grayscale'],
+  //     images: [
+  //       {
+  //         imageUrl: 'test.jpg',
+  //         filters: [
+  //           {
+  //             name: 'negative',
+  //             status: 'in-progress',
+  //             originalname: 'test.jpg',
+  //             _id: '60f0f0b3e6b3f3a3e8b0b0b0',
+
+  //           },
+  //           {
+  //             name: 'grayscale',
+  //             status: 'in-progress',
+  //             originalname: 'test.jpg',
+  //             _id: '60f0f0b3e6b3f3a3e8b0b0b0',
+  //           },
+  //         ],
+  //         originalname: 'test.jpg',
+  //       },
+  //     ],
+  //     _id: '60f0f0b3e6b3f3a3e8b0b0b0',
+  //     originalname: 'test.jpg',
+  //   };
+
+  //   processRepository.save = jest.fn()
+  //     .mockImplementationOnce(() => expectedData);
+  //   const process = await processRepository.save(payload);
+  //   expect(process).toMatchObject(expectedData);
+  //   expect(processRepository.save).toHaveBeenCalledWith(payload);
+  // });
 
   test('Test save method', async () => {
-    jest.restoreAllMocks(); // Restore all mocks from previous tests
-
-    const mockProcess = {
-      filters: ['negative'],
-      images: [{ originalname: 'image1.png', buffer: Buffer.from(''), imageUrl: 'http://example.com/image1.png' }],
+    const processRepository = new ProcessRepository();
+    const payload = {
+      filters: ['negative', 'grayscale'],
+      images: [
+        {
+          originalname: 'img.png',
+          buffer: Buffer.from('./assets/test.jpg'),
+        },
+      ],
     };
 
-    const savedProcess = await processRepository.save(mockProcess);
+    // Mockear ProcessModel para evitar llamadas a la base de datos
+    jest.spyOn(ProcessModel.prototype, 'save').mockResolvedValueOnce();
 
-    expect(savedProcess).toMatchObject(mockProcess);
-    expect(ProcessModel).toHaveBeenCalled();
-    expect(ProcessModel.mock.instances[0].save).toHaveBeenCalled();
-  }, 10000);
+    const process = await processRepository.save(payload);
+
+    // Verificar que ProcessModel.save haya sido llamada con el nuevo proceso
+    expect(ProcessModel.prototype.save).toHaveBeenCalledWith();
+
+    // Verificar que la función save devuelva un objeto ProcessModel
+    expect(process).toBeInstanceOf(ProcessModel);
+
+    // Restaurar la implementación original después de la prueba
+    ProcessModel.prototype.save.mockRestore();
+  });
 
   test('Test getProcessById method', async () => {
+    const processRepository = new ProcessRepository();
     const mockProcess = {
       id: '1234',
       filters: ['negative'],
