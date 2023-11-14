@@ -1,5 +1,6 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { v4 } from 'uuid';
+// eslint-disable-next-line
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import Boom from '@hapi/boom';
 import { MINIO_ACCESS_KEY, MINIO_HOST, MINIO_SECRET_KEY } from '../commons/env.mjs';
 import { BUCKET_NAME } from '../commons/constans.mjs';
@@ -49,8 +50,6 @@ class MinioService {
 
       const { originalname, buffer } = image;
 
-      console.log(buffer);
-
       const originalNameParts = originalname.split('.');
 
       if (originalNameParts.length !== 2) {
@@ -59,22 +58,35 @@ class MinioService {
 
       const extension = originalNameParts[1];
 
-      if (extension !== 'png' && extension !== 'jpg' && extension !== 'jpeg') {
+      if (extension !== 'png' && extension !== 'jpg' && extension !== 'jpeg' && extension !== 'PNG' && extension !== 'JPG' && extension !== 'JPEG') {
         throw Boom.badRequest('Invalid image extension');
       }
 
-      const fileName = `${v4()}.${extension}`;
+      // const fileName = `${v4()}.${extension}`;
 
       await this.conn.send(new PutObjectCommand({
         Bucket: BUCKET_NAME,
-        Key: fileName,
+        Key: originalname,
         Body: buffer,
       }));
 
-      return fileName;
+      return originalname;
     } catch (error) {
       throw Boom.isBoom(error) ? error
-        : Boom.internal('error saving image', error);
+        : Boom.internal('Error saving image', error);
+    }
+  }
+
+  async generateSignedUrl(imgName) {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: imgName,
+      });
+      const url = await getSignedUrl(this.conn, command, { expiresIn: 86400 });
+      return url;
+    } catch (error) {
+      throw Boom.isBoom(error) ? error : Boom.internal('Error, it was not possible to create the signed url', error);
     }
   }
 }
