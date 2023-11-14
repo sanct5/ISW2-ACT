@@ -51,7 +51,8 @@ class ProcessService {
 
     const imagesPromises = images.map((image) => filters.map(async (filter) => {
       const imageBuffer = await this.applyFilter(filter, image.buffer);
-      return this.minioService.saveImage({ ...image, buffer: imageBuffer });
+      const filteredImage = { ...image, buffer: imageBuffer, originalname: `${filter}-${image.originalname}` };
+      return this.minioService.saveImage(filteredImage);
     }));
 
     await Promise.all(imagesPromises);
@@ -63,18 +64,18 @@ class ProcessService {
     return process;
   }
 
-  async dataImage(img, filters) {
+  async dataImage(img, filter) {
     const imageUrl = await this.minioService.generateSignedUrl(img.originalname);
-    const filterData = filters.map((filter) => ({
+    const filterData = {
       name: filter,
       status: IN_PROGRESS_STATUS,
-    }));
-    return { imageUrl, filters: filterData, originalname: img.originalname };
+    };
+    return { imageUrl, filters: [filterData], originalname: img.originalname };
   }
 
   async dataConstructor(imgs, filters) {
     const imagesData = await Promise.all(
-      imgs.map((image) => this.dataImage(image, filters)),
+      imgs.flatMap((image) => filters.map((filter) => this.dataImage({ ...image, originalname: `${filter}-${image.originalname}` }, filter))),
     );
     const newData = {
       filters,
