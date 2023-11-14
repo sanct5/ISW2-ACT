@@ -15,7 +15,7 @@ afterEach(async () => {
 });
 
 describe('test app express server', () => {
-  test('get / should return ok', async () => {
+  test('get / should return "OK NORMAL"', async () => {
     const response = await supertest(app).get('/');
     expect(response.status).toBe(200);
     expect(response.text).toBe('OK NORMAL');
@@ -24,7 +24,7 @@ describe('test app express server', () => {
   test('POST /images should return 200', async () => {
     const response = await supertest(app).post('/images')
       .set('Content-Type', 'multipart/form-data')
-      .field('filters[]', 'grayscale')
+      .field('filters[]', 'greyscale')
       .field('filters[]', 'blur')
       .attach('images[]', 'src/__tests__/assets/test.jpg');
 
@@ -54,9 +54,10 @@ describe('test app express server', () => {
   });
 
   test('POST /images should return 500 status', async () => {
+    closeConnection();
     const response = await supertest(app).post('/images')
       .set('Content-Type', 'multipart/form-data')
-      .field('filters[]', 'grayscale')
+      .field('filters[]', 'greyscale')
       .field('filters[]', 'blur')
       .attach('images[]', 'src/__tests__/assets/test.png');
 
