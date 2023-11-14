@@ -38,6 +38,9 @@ describe('ProcessService test', () => {
     minioService.saveImage = jest.fn()
       .mockImplementationOnce(() => Promise.resolve('image1.png'));
 
+    minioService.generateSignedUrl = jest.fn()
+      .mockImplementationOnce(() => Promise.resolve('mocked-signed-url'));
+
     const process = await processService.applyFilters(payload);
 
     expect(process).toMatchObject(expectedProcess);
