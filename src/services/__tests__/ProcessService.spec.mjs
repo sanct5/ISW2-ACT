@@ -46,7 +46,7 @@ describe('ProcessService test', () => {
     minioService.generateSignedUrl = jest.fn()
       .mockImplementationOnce(() => Promise.resolve('mocked-signed-url'));
 
-    const ApplyFiltersServiceSpy = jest.spyOn(ApplyFiltersService, 'constructor');
+    const ApplyFiltersServiceSpy = jest.spyOn(ApplyFiltersService.prototype, 'applyFilters');
 
     processService = new ProcessService({
       processRepository,
