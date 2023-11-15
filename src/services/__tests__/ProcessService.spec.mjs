@@ -25,7 +25,7 @@ describe('ProcessService test', () => {
     const payload = {
       filters: ['negative'],
       images: [
-        { originalname: 'image1.png', buffer: Buffer.from('test'), filters: ['filter1'] },
+        { originalname: 'image1.png', buffer: Buffer.from('../../__tests__/assets/test.jpg'), filters: ['filter1'] },
       ],
     };
     const expectedProcess = {

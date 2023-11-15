@@ -79,8 +79,7 @@ describe('ApplyFiltersService test', () => {
       );
       expect(observer.notify).toHaveBeenCalled(); // Ensure that the notify method is called
     } catch (error) {
-      // Handle errors if needed
-      console.error(error);
+      return error;
     }
   });
 
