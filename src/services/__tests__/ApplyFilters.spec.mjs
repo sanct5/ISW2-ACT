@@ -1,5 +1,5 @@
 import {
-  describe, test, expect, jest,
+  describe, test, expect, jest, beforeEach,
 } from '@jest/globals';
 import ApplyFilter from '../ApplyFilterFunction/ApplyFilters.mjs';
 
