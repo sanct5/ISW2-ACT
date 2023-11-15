@@ -3,7 +3,6 @@ import {
 } from '@jest/globals';
 import ProcessRepository from '../../repositories/ProcessRepository.mjs';
 import ProcessModel from '../../models/Process.mjs';
-import ProcessService from '../ProcessService.mjs';
 
 describe('ProcessRepository test', () => {
   // test('Test save method', async () => {

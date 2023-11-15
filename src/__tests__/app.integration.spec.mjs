@@ -50,7 +50,7 @@ describe('test app express server', () => {
       .attach('images[]', 'src/__tests__/assets/test.jpg');
 
     expect(response.status).toBe(422);
-    expect(response.body.message).toBe('\"filters\" is required');
+    expect(response.body.message).toBe('"filters" is required');
   });
 
   test('POST /images should return 500 status', async () => {

@@ -37,7 +37,6 @@ class ProcessService {
 
     const Data = await this.dataConstructor(images, filters, this.minioService);
     const process = await this.processRepository.save(Data);
-    console.log(process)
 
     const newData = {
       // eslint-disable-next-line
