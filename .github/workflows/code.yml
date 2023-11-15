@@ -22,8 +22,16 @@ jobs:
         node-version: 18
     
     - name: Install dependencies
-      run: npm ci
+      run: npm i
 
     - name: Check code lint
       run: npm run lint
+      continue-on-error: false
+
+    - name: Check code coverage
+      run: npm run test
+      continue-on-error: false
+    
+    - name: Check code coverage
+      run: npm run test:integration
       continue-on-error: false

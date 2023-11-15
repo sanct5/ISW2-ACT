@@ -3,6 +3,7 @@ import Boom from '@hapi/boom';
 import {
   GREYSCALE_FILTER, BLUR_FILTER, NEGATIVE_FILTER, IN_PROGRESS_STATUS,
 } from '../commons/constans.mjs';
+import ApplyFiltersService from './ApplyFiltersService.mjs';
 
 class ProcessService {
   constructor({ processRepository, minioService }) {
@@ -30,17 +31,34 @@ class ProcessService {
       throw Boom.badData('The total size sum of the images exceeds 50 MB.');
     }
 
-    const imagesPromises = images.map((image) => filters.map(async (filter) => {
-      const imageBuffer = await this.applyFilter(filter, image.buffer);
-      const filteredImage = { ...image, buffer: imageBuffer, originalname: `${filter}-${image.originalname}` };
-      return this.minioService.saveImage(filteredImage);
-    }));
+    const imagesPromises = images.map((image) => this.minioService.saveImage(image));
 
     await Promise.all(imagesPromises);
 
     const Data = await this.dataConstructor(images, filters, this.minioService);
-
     const process = await this.processRepository.save(Data);
+    console.log(process)
+
+    const newData = {
+      // eslint-disable-next-line
+      id: process._id,
+      images: process.images.map((image) => ({
+        // eslint-disable-next-line
+        id: image._id,
+        filters: image.filters.map((filter) => ({
+          // eslint-disable-next-line
+          id: filter._id,
+          name: filter.name,
+        })),
+        originalname: image.originalname,
+        buffer: images.find((img) => img.originalname === image.originalname).buffer,
+      })),
+    };
+
+    new ApplyFiltersService({
+      processRepository: this.processRepository,
+      minioService: this.minioService,
+    }).applyFilters(newData);
 
     return process;
   }
@@ -56,7 +74,7 @@ class ProcessService {
 
   async dataConstructor(imgs, filters) {
     const imagesData = await Promise.all(
-      imgs.flatMap((image) => filters.map((filter) => this.dataImage({ ...image, originalname: `${filter}-${image.originalname}` }, filter))),
+      imgs.flatMap((image) => filters.map((filter) => this.dataImage({ ...image, originalname: `${image.originalname}` }, filter))),
     );
     const newData = {
       filters,

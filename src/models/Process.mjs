@@ -14,6 +14,10 @@ const FilterSchema = new Schema(
       default: IN_PROGRESS_STATUS,
       required: true,
     },
+    imgUrl: {
+      type: String,
+      required: false,
+    },
     message: {
       type: String,
       required: false,
@@ -30,6 +34,10 @@ const ImageSchema = new Schema(
     },
     filters: {
       type: [FilterSchema],
+      required: true,
+    },
+    originalname: {
+      type: String,
       required: true,
     },
   },

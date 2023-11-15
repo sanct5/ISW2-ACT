@@ -1,7 +1,6 @@
 import Express from 'express';
 import bodyParser from 'body-parser';
 import Boom from '@hapi/boom';
-import process from 'process';
 import FiltersRouter from './handlers/filters/index.mjs';
 import buildContainer from './container/buildContainer.mjs';
 
