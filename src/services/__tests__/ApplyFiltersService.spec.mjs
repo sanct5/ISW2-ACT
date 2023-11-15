@@ -85,19 +85,28 @@ describe('ApplyFiltersService test', () => {
   });
 
   test('Test saveImage method', async () => {
+    const mockSaveImage = jest.fn().mockResolvedValue();
+    const mockGenerateSignedUrl = jest.fn().mockResolvedValue('http://example.com/test.jpg');
+    const minioService = {
+      saveImage: mockSaveImage,
+      generateSignedUrl: mockGenerateSignedUrl,
+    };
     const processRepository = new ProcessRepository();
     const applyFiltersService = new ApplyFiltersService({
       processRepository,
+      minioService,
     });
 
     const image = {
       originalname: 'img.png',
       buffer: Buffer.from('./assets/test.jpg'),
     };
-    applyFiltersService.saveImage = jest.fn();
 
-    await applyFiltersService.saveImage(image);
-    expect(processRepository.saveImage).toHaveBeenCalledWith(image);
+    const result = await applyFiltersService.saveImage(image);
+
+    expect(mockSaveImage).toHaveBeenCalledWith(image);
+    expect(mockGenerateSignedUrl).toHaveBeenCalledWith(image.originalname);
+    expect(result).toBe('http://example.com/test.jpg');
   });
 
   test('Test rename method', () => {
