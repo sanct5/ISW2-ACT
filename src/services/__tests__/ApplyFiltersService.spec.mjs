@@ -81,6 +81,7 @@ describe('ApplyFiltersService test', () => {
     } catch (error) {
       return error;
     }
+    return null;
   });
 
   test('Test saveImage method', async () => {

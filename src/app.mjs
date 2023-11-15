@@ -26,6 +26,3 @@ app.use((error, req, res, next) => {
 });
 
 export default app;
-
-// Dockerizacion -> docker-compose up -d
-// Detenerlo -> docker-compose stop

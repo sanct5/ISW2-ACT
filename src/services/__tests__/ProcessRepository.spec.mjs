@@ -5,52 +5,6 @@ import ProcessRepository from '../../repositories/ProcessRepository.mjs';
 import ProcessModel from '../../models/Process.mjs';
 
 describe('ProcessRepository test', () => {
-  // test('Test save method', async () => {
-  //   const processRepository = new ProcessRepository();
-  //   const payload = {
-  //     filters: ['negative', 'grayscale'],
-  //     images: [
-  //       {
-  //         originalname: 'img.png',
-  //         buffer: Buffer.from('./assets/test.jpg'),
-  //       },
-  //     ],
-  //   };
-
-  //   const expectedData = {
-  //     filters: ['negative', 'grayscale'],
-  //     images: [
-  //       {
-  //         imageUrl: 'test.jpg',
-  //         filters: [
-  //           {
-  //             name: 'negative',
-  //             status: 'in-progress',
-  //             originalname: 'test.jpg',
-  //             _id: '60f0f0b3e6b3f3a3e8b0b0b0',
-
-  //           },
-  //           {
-  //             name: 'grayscale',
-  //             status: 'in-progress',
-  //             originalname: 'test.jpg',
-  //             _id: '60f0f0b3e6b3f3a3e8b0b0b0',
-  //           },
-  //         ],
-  //         originalname: 'test.jpg',
-  //       },
-  //     ],
-  //     _id: '60f0f0b3e6b3f3a3e8b0b0b0',
-  //     originalname: 'test.jpg',
-  //   };
-
-  //   processRepository.save = jest.fn()
-  //     .mockImplementationOnce(() => expectedData);
-  //   const process = await processRepository.save(payload);
-  //   expect(process).toMatchObject(expectedData);
-  //   expect(processRepository.save).toHaveBeenCalledWith(payload);
-  // });
-
   test('Test save method', async () => {
     const processRepository = new ProcessRepository();
     const payload = {
