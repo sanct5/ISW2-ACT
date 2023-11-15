@@ -64,6 +64,7 @@ describe('ProcessService test', () => {
 
     expect(process).toMatchObject(expectedProcess);
     expect(ApplyFiltersServiceSpy).toHaveBeenCalled();
+    return null;
   });
 
   test('Test upload images whose size exceeds 50MB', async () => {
