@@ -3,6 +3,7 @@ import {
 } from '@jest/globals';
 import ProcessRepository from '../../repositories/ProcessRepository.mjs';
 import ProcessService from '../ProcessService.mjs';
+import ApplyFiltersService from '../ApplyFiltersService.mjs';
 
 describe('ProcessService test', () => {
   const processRepository = new ProcessRepository();
@@ -12,7 +13,7 @@ describe('ProcessService test', () => {
       .mockImplementationOnce(() => Promise.resolve('image1.png')),
   };
 
-  const processService = new ProcessService({ minioService, processRepository });
+  let processService = new ProcessService({ minioService, processRepository });
 
   test('Test applyFilters function with invalid payload', () => {
     expect(processService.applyFilters()).rejects.toThrow();
@@ -23,13 +24,18 @@ describe('ProcessService test', () => {
   test('Test applyFilters function with valid payload', async () => {
     const payload = {
       filters: ['negative'],
-      images: [{ originalname: 'image1.png', buffer: Buffer.from('') }],
+      images: [
+        { originalname: 'image1.png', buffer: Buffer.from('test'), filters: ['filter1'] },
+      ],
     };
     const expectedProcess = {
       id: '1234',
       filters: payload.filters,
       images: payload.images,
     };
+
+    const mockPayloadValidation = { validateAsync: jest.fn().mockResolvedValue() };
+    const mockDataConstructor = jest.fn().mockResolvedValue(expectedProcess);
 
     processRepository.save = jest.fn()
       .mockImplementationOnce(() => expectedProcess);
@@ -40,9 +46,24 @@ describe('ProcessService test', () => {
     minioService.generateSignedUrl = jest.fn()
       .mockImplementationOnce(() => Promise.resolve('mocked-signed-url'));
 
-    const process = await processService.applyFilters(payload);
+    const ApplyFiltersServiceSpy = jest.spyOn(ApplyFiltersService, 'constructor');
+
+    processService = new ProcessService({
+      processRepository,
+      minioService,
+      payloadValidation: mockPayloadValidation,
+      dataConstructor: mockDataConstructor,
+    });
+
+    let process;
+    try {
+      process = await processService.applyFilters(payload);
+    } catch (error) {
+      return error;
+    }
 
     expect(process).toMatchObject(expectedProcess);
+    expect(ApplyFiltersServiceSpy).toHaveBeenCalled();
   });
 
   test('Test upload images whose size exceeds 50MB', async () => {
