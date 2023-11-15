@@ -19,6 +19,7 @@ class ApplyFilter {
   notify({
     id, imgId, filterId, imgUrl,
   }) {
+    console.log('ApplyFilter.notify called');
     if (this.subscribers[imgId]) {
       this.subscribers[imgId][filterId].notify(id, imgId, filterId, imgUrl);
     }

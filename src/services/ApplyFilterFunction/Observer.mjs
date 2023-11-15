@@ -6,6 +6,7 @@ class Observer {
   }
 
   async notify(id, imgId, filterId, imgUrl) {
+    console.log('Observer.notify called');
     await this.processRepository.updateOne(
       { _id: id, 'images._id': imgId, 'images.filters._id': filterId },
       {
