@@ -23,19 +23,12 @@ describe('ProcessService test', () => {
 
   const processService = new ProcessService({ minioService, processRepository });
 
-<<<<<<< HEAD
   afterEach(jest.clearAllMocks);
 
   test('Test applyFilters function with invalid payload', async () => {
     await expect(processService.applyFilters()).rejects.toThrow();
     await expect(processService.applyFilters({})).rejects.toThrow();
     await expect(processService.applyFilters({ filters: [] })).rejects.toThrow();
-=======
-  test('Test applyFilters function with invalid payload', () => {
-    expect(processService.applyFilters()).rejects.toThrow();
-    expect(processService.applyFilters({})).rejects.toThrow();
-    expect(processService.applyFilters({ filters: [] })).rejects.toThrow();
->>>>>>> 21063c2848669e05a63cb98e99445c74c4bb42e5
   });
 
   test('Test applyFilters function with valid payload', async () => {
