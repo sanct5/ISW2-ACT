@@ -1,6 +1,5 @@
 import Joi from 'joi';
 import Boom from '@hapi/boom';
-import sharp from 'sharp';
 import {
   GREYSCALE_FILTER, BLUR_FILTER, NEGATIVE_FILTER, IN_PROGRESS_STATUS,
 } from '../commons/constans.mjs';
@@ -14,24 +13,6 @@ class ProcessService {
         .items(Joi.string().valid(GREYSCALE_FILTER, BLUR_FILTER, NEGATIVE_FILTER)),
       images: Joi.array().required().min(1),
     }).required();
-  }
-
-  async applyFilter(filter, imageBuffer) {
-    let result;
-    switch (filter) {
-      case GREYSCALE_FILTER:
-        result = await sharp(imageBuffer).greyscale().toBuffer();
-        break;
-      case BLUR_FILTER:
-        result = await sharp(imageBuffer).blur().toBuffer();
-        break;
-      case NEGATIVE_FILTER:
-        result = await sharp(imageBuffer).negate().toBuffer();
-        break;
-      default:
-        throw Boom.badData(`Invalid filter: ${filter}`);
-    }
-    return result;
   }
 
   async applyFilters(payload) {
