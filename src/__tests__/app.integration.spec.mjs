@@ -15,7 +15,7 @@ afterEach(async () => {
 });
 
 describe('test app express server', () => {
-  test('get / should return ok', async () => {
+  test('get / should return "OK NORMAL"', async () => {
     const response = await supertest(app).get('/');
     expect(response.status).toBe(200);
     expect(response.text).toBe('OK NORMAL');
@@ -24,7 +24,7 @@ describe('test app express server', () => {
   test('POST /images should return 200', async () => {
     const response = await supertest(app).post('/images')
       .set('Content-Type', 'multipart/form-data')
-      .field('filters[]', 'grayscale')
+      .field('filters[]', 'greyscale')
       .field('filters[]', 'blur')
       .attach('images[]', 'src/__tests__/assets/test.jpg');
 
@@ -35,12 +35,33 @@ describe('test app express server', () => {
     expect(response.body).toHaveProperty('updatedAt');
   });
 
-  test('POST /images shuld return 422 status', async () => {
+  test('POST /images should return 422 status', async () => {
     const response = await supertest(app).post('/images')
       .set('Content-Type', 'multipart/form-data')
-      .field('filters[]', 'grayscale');
+      .field('filters[]', 'invalid_filter');
 
     expect(response.status).toBe(422);
-    expect(response.body.message).toHaveProperty('"images" must contain at least 1 items');
+    expect(response.body.message).toContain('"filters[0]" must be one of [greyscale, blur, negative]');
+  });
+
+  test('POST /image should return "Filter are required"', async () => {
+    const response = await supertest(app).post('/images')
+      .set('Content-Type', 'multipart/form-data')
+      .attach('images[]', 'src/__tests__/assets/test.jpg');
+
+    expect(response.status).toBe(422);
+    expect(response.body.message).toBe('\"filters\" is required');
+  });
+
+  test('POST /images should return 500 status', async () => {
+    closeConnection();
+    const response = await supertest(app).post('/images')
+      .set('Content-Type', 'multipart/form-data')
+      .field('filters[]', 'greyscale')
+      .field('filters[]', 'blur')
+      .attach('images[]', 'src/__tests__/assets/test.png');
+
+    expect(response.status).toBe(500);
+    expect(response.body.message).toBe('Internal Server Error');
   });
 });
