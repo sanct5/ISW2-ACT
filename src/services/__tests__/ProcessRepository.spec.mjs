@@ -93,4 +93,23 @@ describe('ProcessRepository test', () => {
     expect(fetchedProcess).toMatchObject(mockProcess);
     expect(ProcessModel.findById).toHaveBeenCalledWith('1234');
   });
+
+  test('Test updateOne method', async () => {
+    const processRepository = new ProcessRepository();
+    const mockProcess = {
+      id: '1234',
+      filters: ['negative'],
+      images: [{ originalname: 'image1.png', buffer: Buffer.from('') }],
+    };
+
+    ProcessModel.findOneAndUpdate = jest.fn().mockResolvedValue(mockProcess);
+
+    const data = { filters: ['negative'] };
+    const option = { new: true };
+
+    const fetchedProcess = await processRepository.updateOne('1234', data, option);
+
+    expect(fetchedProcess).toMatchObject(mockProcess);
+    expect(ProcessModel.findOneAndUpdate).toHaveBeenCalledWith('1234', data, option);
+  });
 });

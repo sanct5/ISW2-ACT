@@ -10,7 +10,7 @@ class ApplyFiltersService {
   }
 
   async applyFilters(newImages) {
-    newImages.images.map(async (image) => {
+    await Promise.all(newImages.images.map(async (image) => {
       const imageBuffer = await sharp(image.buffer).toBuffer();
       const applyImgFilter = new ApplyFilter();
       const observer = new Observer({ processRepository: this.processRepository });
@@ -23,7 +23,7 @@ class ApplyFiltersService {
         });
       });
 
-      image.filters.forEach(async (filter) => {
+      await Promise.all(image.filters.map(async (filter) => {
         const data = {
           id: newImages.id,
           imgId: image.id,
@@ -62,8 +62,8 @@ class ApplyFiltersService {
 
           applyImgFilter.notify({ ...data, imgUrl });
         }
-      });
-    });
+      }));
+    }));
   }
 
   async saveImage(image) {

@@ -18,7 +18,7 @@ class ProcessRepository {
 
   // eslint-disable-next-line class-methods-use-this
   async updateOne(id, data, option = { new: true }) {
-    await ProcessModel.findOneAndUpdate(id, data, option);
+    return ProcessModel.findOneAndUpdate(id, data, option);
   }
 }
 
