@@ -7,9 +7,11 @@ const applyFiltersHandler = async (req, res, next) => {
 
     const response = await req.container
       .processService.applyFilters({ ...body, images: req.files });
+    console.log(req.files);
     return res.status(HttpStatusCodes.OK).json(response);
   } catch (error) {
     const err = Boom.isBoom(error) ? error : Boom.internal(error);
+    console.log(req.files);
     return next(err);
   }
 };

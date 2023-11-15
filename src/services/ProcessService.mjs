@@ -5,19 +5,14 @@ import {
 } from '../commons/constans.mjs';
 
 class ProcessService {
-  processRepository = null;
-
-  minioService = null;
-
-  payloadValidation = Joi.object({
-    filters: Joi.array().required().min(1)
-      .items(Joi.string().valid(GREYSCALE_FILTER, BLUR_FILTER, NEGATIVE_FILTER)),
-    images: Joi.array().required().min(1),
-  }).required();
-
   constructor({ processRepository, minioService }) {
     this.processRepository = processRepository;
     this.minioService = minioService;
+    this.payloadValidation = Joi.object({
+      filters: Joi.array().required().min(1)
+        .items(Joi.string().valid(GREYSCALE_FILTER, BLUR_FILTER, NEGATIVE_FILTER)),
+      images: Joi.array().required().min(1),
+    }).required();
   }
 
   async applyFilters(payload) {
@@ -35,31 +30,33 @@ class ProcessService {
       throw Boom.badData('The total size sum of the images exceeds 50 MB.');
     }
 
-    const imagesPromises = images.map((image) => this.minioService.saveImage(image));
+    const imagesPromises = images.map((image) => filters.map(async (filter) => {
+      const imageBuffer = await this.applyFilter(filter, image.buffer);
+      const filteredImage = { ...image, buffer: imageBuffer, originalname: `${filter}-${image.originalname}` };
+      return this.minioService.saveImage(filteredImage);
+    }));
 
-    const imagesNames = await Promise.all(imagesPromises);
+    await Promise.all(imagesPromises);
 
     const Data = await this.dataConstructor(images, filters, this.minioService);
 
     const process = await this.processRepository.save(Data);
 
-    console.log(imagesNames);
-
     return process;
   }
 
-  async dataImage(img, filters) {
+  async dataImage(img, filter) {
     const imageUrl = await this.minioService.generateSignedUrl(img.originalname);
-    const filterData = filters.map((filter) => ({
+    const filterData = {
       name: filter,
       status: IN_PROGRESS_STATUS,
-    }));
-    return { imageUrl, filters: filterData, originalname: img.originalname };
+    };
+    return { imageUrl, filters: [filterData], originalname: img.originalname };
   }
 
   async dataConstructor(imgs, filters) {
     const imagesData = await Promise.all(
-      imgs.map((image) => this.dataImage(image, filters)),
+      imgs.flatMap((image) => filters.map((filter) => this.dataImage({ ...image, originalname: `${filter}-${image.originalname}` }, filter))),
     );
     const newData = {
       filters,

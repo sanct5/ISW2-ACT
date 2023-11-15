@@ -16,4 +16,10 @@ EXPOSE 5001
 
 RUN npm install --production
 
-ENTRYPOINT [ "npm","start" ]
+RUN npm install pm2 -g
+ENV PM2_PUBLIC_KEY ccqt26xeem58946
+ENV PM2_SECRET_KEY 5zkwaph4n0s0b0z
+
+CMD ["pm2-runtime", "index.mjs", "--instances", "2"]
+
+# ENTRYPOINT [ "npm","start" ]
